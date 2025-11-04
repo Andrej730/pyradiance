@@ -249,6 +249,11 @@ class TestPyradianceCLI(unittest.TestCase):
         )
         ptypes = {p.ptype for p in pr.parse_primitive(res.decode())}
         self.assertEqual(ptypes, {"light", "brightfunc", "source"})
+        res2 = pr.gendaylit(
+            altitude=35.2, azimuth=-6.2, dirnorm=800, diffhor=100
+        )
+        ptypes2 = {p.ptype for p in pr.parse_primitive(res2.decode())}
+        self.assertEqual(ptypes2, {"light", "brightfunc", "source"})
 
     def test_gensky(self):
         res = pr.gensky(
