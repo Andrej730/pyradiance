@@ -153,10 +153,12 @@ def genbox(
 
 @handle_called_process_error
 def gendaylit(
-    dt: datetime,
-    latitude: float,
-    longitude: float,
-    timezone: int,
+    dt: None | datetime = None,
+    latitude: None | float = None,
+    longitude: None | float = None,
+    timezone: None | int = None,
+    altitude: None | float = None,
+    azimuth: None | float = None,
     year: None | int = None,
     dirnorm: None | float = None,
     diffhor: None | float = None,
@@ -173,10 +175,12 @@ def gendaylit(
     Perez models for direct and diffuse components.
 
     Args:
-        dt: python datetime object
-        latitude: latitude in degrees
-        longitude: longitude in degrees
-        timezone: standard meridian timezone, e.g., 120 for PST
+        dt: datetime object, mutally exclusive with altitude and azimuth
+        latitude: latitude (degrees), only apply if dt is not None
+        longitude: longitude (degrees), only apply if dt is not None
+        timezone: standard meridian timezone, e.g., 120 for PST, only apply if dt is not None
+        altitude: sun altitude, degrees above horizon, mutally exclusive with dt
+        azimuth: sun azimuth, degrees west of south, mutally exclusive with dt
         year: Need to set it explicitly, won't use year in datetime object
         dirnorm: direct normal irradiance
         diffhor: diffuse horizontal irradiance
@@ -192,20 +196,23 @@ def gendaylit(
     Returns:
         output of gendaylit
     """
-    cmd = [
-        str(BINPATH / "gendaylit"),
-        str(dt.month),
-        str(dt.day),
-        str(dt.hour + dt.minute / 60 + dt.second / 3600),
-        "-a",
-        str(latitude),
-        "-o",
-        str(longitude),
-        "-m",
-        str(timezone),
-    ]
-    if year is not None:
-        cmd.extend(["-y", str(year)])
+    cmd = [str(BINPATH / "gendaylit")]
+    if dt is not None:
+        cmd.append(str(dt.month))
+        cmd.append(str(dt.day))
+        cmd.append(str(dt.hour + dt.minute / 60 + dt.second / 3600))
+        if latitude is not None:
+            cmd.extend(["-a", str(latitude)])
+        if longitude is not None:
+            cmd.extend(["-o", str(longitude)])
+        if timezone is not None:
+            cmd.extend(["-m", str(timezone)])
+        if year is not None:
+            cmd += ["-y", str(year)]
+    elif None not in (altitude, azimuth):
+        cmd.extend(["-ang", str(altitude), str(azimuth)])
+    else:
+        raise ValueError("pyradiance.gendaylit: Must provide either dt or altitude and azimuth")
     if None not in (dirnorm, diffhor):
         cmd.extend(["-W", str(dirnorm), str(diffhor)])
     elif None not in (dirhor, diffhor):
