@@ -38,12 +38,39 @@ jobs:
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
         CIBW_TEST_SKIP: "*-win*"
 
+    - name: upload wheels
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist-${{ matrix.os }}-python-${{ matrix.python-version }}
+        path: ./wheelhouse/*.whl
+        if-no-files-found: warn
+        compression-level: 6
+        overwrite: false
+        include-hidden-files: false
+
+
+
+
+  publish-pypi:
+    runs-on: ubuntu-latest
+    needs: build-all
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+    strategy:
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: dist-*
+        path: dist/
+        merge-multiple: true
+
     - name: Upload wheels to GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        files: ./wheelhouse/*.whl
-        tag_name: dist-${{ matrix.os }}-python-tag
-        name: Release dist-${{ matrix.os }}-python
+        files: ./dist/*.whl
+        tag_name: dist-release
+        name: Release dist-release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -53,5 +80,5 @@ jobs:
         repository-url: https://test.pypi.org/legacy/
         user: __token__
         password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        packages_dir: wheelhouse
+        packages_dir: dist
 
