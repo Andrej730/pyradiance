@@ -42,7 +42,7 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: ./wheelhouse/*.whl
-        tag_name: dist-${{ matrix.os }}-python-tag
+        tag_name: dist-${{ matrix.os }}-python-tag-py-api-cp312
         name: Release dist-${{ matrix.os }}-python
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
