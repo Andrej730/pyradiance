@@ -4,7 +4,7 @@ requires = ["scikit-build-core >=0.4.3", "nanobind >=1.3.2"]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "pyradiance"
+name = "pyradiance-py313"
 version = "1.1.5"
 description = "Python inteface for Radiance"
 readme = "README.md"
